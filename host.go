@@ -9,7 +9,6 @@ import (
 var allClients map[*Client]int
 
 type Client struct {
-	// incoming chan string
 	outgoing   chan string
 	reader     *bufio.Reader
 	writer     *bufio.Writer
@@ -56,7 +55,6 @@ func NewClient(connection net.Conn) *Client {
 	reader := bufio.NewReader(connection)
 
 	client := &Client{
-		// incoming: make(chan string),
 		outgoing: make(chan string),
 		conn:     connection,
 		reader:   reader,
