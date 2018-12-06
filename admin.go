@@ -11,37 +11,35 @@ import (
 )
 
 var (
-	playersAndPoints []Pair
+	players []string
+	points	[]int
 	alivePlayers     []string
 	gameActive       bool = false
 )
 
-type Pair struct { //
-	a string
-	b int
-}
 
-func givePoints(name string, points int) { //adds player score
-	for i := 0; i < len(playersAndPoints); i++ {
-		if playersAndPoints[i].a == name {
-			playersAndPoints[i].b = playersAndPoints[i].b + points
+func givePoints(name string, addpoints int) { //adds player score
+	for i := 0; i < len(players); i++ {
+		if players[i] == name {
+			points[i] = points[i] + addpoints
 			return
 		}
 	}
 	log.Print("Error updating ", name, "'s score!")
 }
 func removePlayer(name string, listName string) { //removes player from  specified list
-	if listName == "playersAndPoints" {
-		for i := 0; i < len(playersAndPoints); i++ {
-			if playersAndPoints[i].a == name { //remove player when found
-				playersAndPoints = append(playersAndPoints[:i], playersAndPoints[i+1:])
+	if listName == "players" {
+		for i := 0; i < len(players); i++ {
+			if players[i] == name { //remove player when found
+				players = append(players[:i], players[(i+1):]...)
+				points = append(points[:i], points[(i+1):]...)
 				return
 			}
 		}
 	} else if listName == "alivePlayers" {
 		for i := 0; i < len(alivePlayers); i++ {
 			if alivePlayers[i].a == name { //remove player when found
-				alivePlayers = append(alivePlayers[:i], alivePlayers[i+1:])
+				alivePlayers = append(alivePlayers[:i], alivePlayers[i+1:]...)
 				return
 			}
 		}
