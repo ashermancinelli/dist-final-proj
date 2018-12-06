@@ -1,66 +1,103 @@
-
-
 package main
 
 import (
+	"flag"
+	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
-	"io"
-	"flag"
-	"fmt"
+	"strings"
 )
 
-type IncrementalMessage struct {
-	bytes uint64
+func handleGameString(str string) []byte {
+	commands := strings.Split(str, ";")
+	var finalValue string
+	switch commands[0] {
+	case "attack":
+		finalValue = fmt.Sprintf("I am attacking %s", commands[1])
+		finalValue = fmt.Sprint(finalValue + " doing " + commands[2] + "damage.\n")
+	default:
+		finalValue = "This is not an attack\n"
+	}
+	return []byte(finalValue)
 }
 
-func CoordinateStreams(con net.Conn) {
-	c := make(chan IncrementalMessage)
+func handleInputString(str string) []byte {
+	// rVal := fmt.Sprintf("attack;%s\n", str)
+	return []byte(str)
+}
 
-	handleGameInput := func(r io.ReadCloser, w io.WriteCloser) {
-		defer r.Close()
-		defer w.Close()
-
-		n, _ := io.Copy(w, r)
-
-
-
-
+func copyToString(r io.Reader) (res string, err error, n int64) {
+	var sb strings.Builder
+	if n, err = io.Copy(&sb, r); err == nil {
+		res = sb.String()
 	}
+	return
+}
 
-	handleUserInput := func(r io.ReadCloser, w io.WriteCloser) {
-		defer r.Close()
-		defer w.Close()
+func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
+	buf := make([]byte, 1024)
+	sync := make(chan int)
 
-		n, _ := io.Copy(w, r)
+	go func() {
+		defer func() {
+			if con, ok := dst.(net.Conn); ok {
+				con.Close()
+				log.Printf("Con from %v closed\n", con.RemoteAddr())
+			}
+			sync <- 0
+		}()
 
-		input := fmt.Sprint(w)
-		log.Println(input)
-		c <- IncrementalMessage{bytes: uint64(n)}
+		for {
 
+			nBytes, err := src.Read(buf)
+			if err != nil {
+				if err != io.EOF {
+					log.Printf("Read error: %s\n", err)
+				}
+				break
+			}
+
+			if !isOutgoing {
+				_, err = dst.Write(buf[0:nBytes])
+			} else {
+				str := string(buf[0:nBytes])
+				data := handleGameString(str)
+				_, err = dst.Write(data)
+			}
+			if err != nil {
+				log.Fatalf("Write error: %s\n", err)
+			}
+		}
+	}()
+
+	return sync
+
+}
+
+func HandleCons(con net.Conn) {
+
+	stdoutChan := streamCpy(con, os.Stdout, false)
+	remoteChan := streamCpy(os.Stdin, con, true)
+
+	select {
+	case <-stdoutChan:
+		log.Println("Remote connection broken.")
+	case <-remoteChan:
+		log.Println("Local connection broken.")
 	}
-
-	go handleUserInput(con, os.Stdout)
-	go handleUserInput(os.Stdin, con)
-
-	p := <-c
-	log.Printf("[%s]: Connection closed by remote. %d bytes received.\n", con.RemoteAddr(), p.bytes)
-	p = <-c
-	log.Printf("[%s]: Connection closed locally. %d bytes sent.\n", con.RemoteAddr(), p.bytes)
-
 }
 
 func StartClient(host string, port string) {
-	con, err := net.Dial("tcp", host + port)
+	con, err := net.Dial("tcp", host+port)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	log.Println("Connected to ", host + port)
-	CoordinateStreams(con)
+	log.Println("Connected to ", host+port)
+	HandleCons(con)
 }
-
 
 func main() {
 
