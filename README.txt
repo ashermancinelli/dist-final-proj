@@ -1,17 +1,23 @@
 ----------------------------------
 ///////Welcome to goWar!///////////
 ----------------------------------
+Game mode 1:
+goWar Battle Royale.
 
-To play go War at least 3 computers are needed. 1 server and at least 2 clients. There is no max player limit
+Setup:
+goWar Battle Royale is played by 2 or more players. Each player connects to a hosting system running "server.go". All players run the client.go program where  game will prompt to enter a 3 character name. After name is entered, wait until all players are in lobby. One VIP will enter the command goWarStart1. After this all players will recieve a start game notification and play begins.
 
-Server will intialize all clients as red or blue teams. The winner team with the last computer standing wins.
-To play, one user will send a start command to all players. On the start of war clients will choose an
-enemy to start attacking. 1 spacebar hit = 1 damage point. Users die when they take 100 damage.
-When only players on one team are remaining that team will be declared victorious.
-
-Have fun!
-
+To play:
+To play goWar watch the console for any damage taken while typing in the name of an enemy to attack. 
 ---------------------------
 Technical side of things:
 
-//TODO
+
+
+Communication on server takes the for:
+
+
+type;data1;data2;data3
+
+start/stop;
+attack;recieverName;attackerName
