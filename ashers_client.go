@@ -11,14 +11,24 @@ import (
 )
 
 func handleGameString(str string) []byte {
+	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";")
+
 	var finalValue string
-	switch commands[0] {
-	case "attack":
+	switch {
+	case commands[0] == "kill":
+		if len(commands) < 3 {
+			return []byte("error;bad args;kill\n")
+		}
+		finalValue = fmt.Sprint("Player ", commands[2], " has been killed by ", commands[1], "\n")
+	case commands[0] == "attack":
+		if len(commands) < 3 {
+			return []byte("error;bad args;attack\n")
+		}
 		finalValue = fmt.Sprintf("I am attacking %s", commands[1])
-		finalValue = fmt.Sprint(finalValue + " doing " + commands[2] + "damage.\n")
+		finalValue = fmt.Sprint(finalValue, "doing", commands[2], "damage.\n")
 	default:
-		finalValue = "This is not an attack\n"
+		finalValue = "error;command not implemented\n"
 	}
 	return []byte(finalValue)
 }
