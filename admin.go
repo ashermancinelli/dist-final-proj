@@ -38,7 +38,7 @@ func removePlayer(name string, listName string) { //removes player from  specifi
 		}
 	} else if listName == "alivePlayers" {
 		for i := 0; i < len(alivePlayers); i++ {
-			if alivePlayers[i].a == name { //remove player when found
+			if alivePlayers[i] == name { //remove player when found
 				alivePlayers = append(alivePlayers[:i], alivePlayers[i+1:]...)
 				return
 			}
@@ -57,16 +57,17 @@ func handleGameString(str string) []byte { //handles relevant string data from m
 		if len(commands) < 2 {
 			return []byte("error; bad name arg\n")
 		}
-		playersAndPoints = append(playersAndPoints, Pair{commands[1], 0})
+		players = append(players, commands[1])
+		points = append(points, 0)
 		alivePlayers = append(alivePlayers, commands[1])
-		finalValue = fmt.Sprint("Adding new player: ", command[1], "\n")
+		finalValue = fmt.Sprint("Adding new player: ", commands[1], "\n")
 	case commands[0] == "death": //reports another players death
 		if len(commands) < 3 { //error check
 			return []byte("error;bad args;kill\n")
 		}
 		finalValue = fmt.Sprint("Player ", commands[2], " has been killed by ", commands[1], "\n") //output who died
-		givePoints(command[3], 10)                                                                 //give 10 point to the killer
-		removePlayer(command[2], "alivePlayers")                                                   //remove the dead person from alive players list
+		givePoints(commands[3], 10)                                                                 //give 10 point to the killer
+		removePlayer(commands[2], "alivePlayers")                                                   //remove the dead person from alive players list
 	default:
 		finalValue = "error;command_not_implemented\n"
 		log.Print("Bad game data: ", str, "\n")
@@ -98,9 +99,9 @@ func handleInputString(str string) []byte { //valid inputs are start and stop,
 			log.Print("invalid boot command, should be 'boot name'")
 			return []byte(finalValue)
 		}
-		removePlayer(commands[1], playersAndPoints)
-		removePlayer(command[1], alivePlayers)
-		finalValue = fmt.Sprint(command[1], " has been booted from game")
+		removePlayer(commands[1], "players")
+		removePlayer(commands[1], "alivePlayers")
+		finalValue = fmt.Sprint(commands[1], " has been booted from game")
 	default:
 		finalValue = fmt.Sprint("bad admin input\n")
 		log.Print("Default error\n")
