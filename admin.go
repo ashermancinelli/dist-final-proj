@@ -103,8 +103,8 @@ func handleInputString(str string) []byte { //valid inputs are start and stop,
 		removePlayer(commands[1], "alivePlayers")
 		finalValue = fmt.Sprint(commands[1], " has been booted from game")
 	default:
-		finalValue = fmt.Sprint("bad admin input\n")
-		log.Print("Default error\n")
+		finalValue = fmt.Sprint(str + "\n")
+		log.Print("Custom Admin Input set\n")
 	}
 	return []byte(finalValue)
 }
@@ -134,11 +134,11 @@ func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
 
 			if !isOutgoing {
 				str := string(buf[0:nBytes])
-				data := handleInputString(str)
+				data := handleGameString(str)
 				_, err = dst.Write(data)
 			} else {
 				str := string(buf[0:nBytes])
-				data := handleGameString(str)
+				data := handleInputString(str)
 				_, err = dst.Write(data)
 			}
 			if err != nil {
