@@ -66,7 +66,7 @@ net.createServer(sock => {
         d = data.toString().trim();
         if (d.split(';')[0] === 'name') names.push(d.split(';')[1]);
     });
-}).listen(2007);
+}).listen(port);
 
 console.log('Listening on port: ' + port + ' with debug mode: ' + debug);
 

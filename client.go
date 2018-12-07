@@ -36,6 +36,7 @@ func isPlayerAlive(name string) bool { //return true if named player is in alive
 	}
 	return false
 }
+
 func killPlayer(name string) bool { // takes out player from alive Players list
 	for i := 0; i < len(alivePlayers); i++ {
 		if name == alivePlayers[i] {
@@ -56,7 +57,7 @@ func givePoints(name string, points int) { //give points to specific player
 	}
 	log.Println("Error in givePoints(),  player", name, "not in the players list\n")
 }
-func outputScores() string {
+func outPutScores() string {
 	message := "GAME OVER!!\n"
 	if len(alivePlayers) == 1 {
 		message += "Last living player: " + alivePlayers[0]
@@ -105,7 +106,7 @@ func handleGameString(str string) []byte {
 			return []byte("error;bad args;death\n")
 		}
 		finalValue = fmt.Sprint("Player ", commands[1], " has been killed by ", commands[2], "\n") //output who died
-		removePlayer(commands[1])
+		killPlayer(commands[1])
 	case commands[0] == "attack": //a player was attacked
 		if len(commands) < 4 {
 			return []byte("error;bad args;attack\n")
