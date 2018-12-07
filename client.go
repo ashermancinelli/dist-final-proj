@@ -1,5 +1,7 @@
 package main
-
+//TODO implement "you cant attack them theyre already dead"
+//TODO implement "Youre dead, wait till next game"
+//TODO make help window not come on every new line
 import (
 	"flag"
 	"fmt"
@@ -28,7 +30,8 @@ var (
 	spectatorMode = false
 )
 
-func handleGameString(str string) []byte { //handles relevant string data from messaging system
+//handles information given from public record and handles relevate data
+func handleGameString(str string) []byte { 
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";") //split strings by ";" separated values
 
@@ -38,44 +41,18 @@ func handleGameString(str string) []byte { //handles relevant string data from m
 		allPlayers = append(allPlayers, commands[1])
 		log.Println("New player added.")
 	case commands[0] == "meta": //a message type for anything else
-		switch {
-		case commands[1] == "all players":
-			allPlayers = commands[2:]
-			if spectatorMode {
-				finalValue = fmt.Sprint("Updated ", commands[1], " to game state.\n")
-			}
-
-		case commands[1] == "alive players":
-			copy(alivePlayers, commands[2:])
-			if spectatorMode {
-				finalValue = fmt.Sprint("Updated ", commands[1], " to game state.\n")
-			}
-
-		case commands[1] == "dead players":
-			copy(deadPlayers, commands[2:])
-			finalValue = fmt.Sprint("Updated ", commands[1], " to game state.\n")
-
-		case commands[1] == "game state":
-			switch commands[2] {
-			case "start":
-				gameActive = true
-				finalValue = "Game has began!\n"
-
-			case "end":
-				gameActive = false
-				finalValue = "Game over!\n"
-			}
-
-		default:
-			finalValue = "error;bad meta tag\n"
+		if len(commands) < 2{
+			return []byte("\n")
 		}
+		finalValue = fmt.Sprint(commands[1], "\n")
 	case commands[0] == "start": //start game
+		finalValue = fmt.Sprint("GoWar STARTED!!! \n")
 		gameActive = true
 	case commands[0] == "stop":
 		if len(commands) < 2 {
 			return []byte("error, should report final game state in Stop signal\n")
 		}
-		//finalValue = fmt.Sprint(commands[1])
+		finalValue = fmt.Sprint(commands[1])//print game results given in stop command
 		gameActive = false
 	case commands[0] == "death": //reports another players death
 		if len(commands) < 3 { //error check
@@ -106,6 +83,7 @@ func handleGameString(str string) []byte { //handles relevant string data from m
 	return []byte(finalValue)
 }
 
+//handles messages given from this client, and processes them to be sent to other players
 func handleInputString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, " ")
@@ -161,9 +139,9 @@ func handleInputString(str string) []byte {
 			log.Println("No other players have registered on this server yet.")
 		} else {
 			log.Print("My name: ", myName, "\n")
-			log.Print("All names:\n")
-			for i, v := range allPlayers {
-				log.Print("Name ", i, ": ", v)
+			log.Print("Other players:\n")
+			for i:=1; i < len(allPlayers);i++ {//TODO take admin out of print player names
+				log.Print("Player ", i, ": ", allPlayers[i])
 			}
 		}
 	case "score":
