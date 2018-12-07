@@ -1,7 +1,4 @@
 package main
-//TODO implement "you cant attack them theyre already dead"
-//TODO implement "Youre dead, wait till next game"
-//TODO make help window not come on every new line
 import (
 	"flag"
 	"fmt"
@@ -19,9 +16,9 @@ const (
 )
 
 var (
-	alivePlayers  []string
-	deadPlayers   []string
 	allPlayers    []string
+	playerPoints	[]int
+	alivePlayers  []string
 	myName        = "placeholder"
 	nameSet       = false
 	gameActive    = false
@@ -29,7 +26,49 @@ var (
 	mykiller      = "stillAlive"
 	spectatorMode = false
 )
+func isPlayerAlive(name string) bool {//return true if named player is in alivePlayers list, false if not
+	for i:=0; i < alivePlayers; i++{
+		if name = alivePlayers[i]{
+			return true
+		}
+	}
+	return false
+}
+func killPlayer(name string){// takes out player from alive Players list
+	for i:=0; i < alivePlayers; i++{
+		if name = alivePlayers[i]{
+			alivePlayers = append(alivePlayers[:i],alivePlayers[i+1:])//take out player from list
+			return true
+		}
+	}
+	log.Println("Error! player" , name, "not in the alive players list\n")
+}
 
+func givePoints(name string, points int){//give points to specific player
+	for i:=0; i < allPlayers; i++{
+		if name = allPlayers[i]{
+			playerPoints[i] = playerPoints[i] + points
+			return true
+		}
+	}
+	log.Println("Error in givePoints(),  player" , name, "not in the players list\n")
+}
+func outputScores() string{
+	message := "GAME OVER!!\n"
+	if len(alivePlayers)==1{
+		message += "Last living player: " + alivePlayers[0]
+	}else if len(alivePlayers) > 1{
+		message += "Players left standing:"
+		for i:=0; i <len(alivePlayers);i++{message+= alivePlayers[i] + ", "}
+	}else{
+		message += "NO players left standing!"
+	}
+	message += "\n Score Board \n ----------------------------\n"
+	for i=0; i < len(allPlayers);i++{
+		message += allPlayers[i] + "--------" + playerPoints[i] + "\n"
+	}
+	return message
+}
 //handles information given from public record and handles relevate data
 func handleGameString(str string) []byte { 
 	str = strings.TrimSpace(str)
@@ -39,6 +78,7 @@ func handleGameString(str string) []byte {
 	switch {
 	case commands[0] == "name":
 		allPlayers = append(allPlayers, commands[1])
+		playerPoints = append(playerPoints,0)
 		log.Println("New player added.")
 	case commands[0] == "meta": //a message type for anything else
 		if len(commands) < 2{
@@ -49,16 +89,17 @@ func handleGameString(str string) []byte {
 		finalValue = fmt.Sprint("GoWar STARTED!!! \n")
 		gameActive = true
 	case commands[0] == "stop":
-		if len(commands) < 2 {
-			return []byte("error, should report final game state in Stop signal\n")
+		if gameActive{
+			finalValue = fmt.Sprint(outPutScores() )//print game results given in stop command
+			gameActive = false
 		}
-		finalValue = fmt.Sprint(commands[1])//print game results given in stop command
-		gameActive = false
+		
 	case commands[0] == "death": //reports another players death
 		if len(commands) < 3 { //error check
 			return []byte("error;bad args;death\n")
 		}
-		finalValue = fmt.Sprint("Player ", commands[2], " has been killed by ", commands[1], "\n") //output who died
+		finalValue = fmt.Sprint("Player ", commands[1], " has been killed by ", commands[2], "\n") //output who died
+		removePlayer(commands[1])
 	case commands[0] == "attack": //a player was attacked
 		if len(commands) < 4 {
 			return []byte("error;bad args;attack\n")
@@ -87,8 +128,11 @@ func handleGameString(str string) []byte {
 func handleInputString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, " ")
-
-	finalValue := ""
+	if myHealth == 0 {//check first to see if player is still alive
+		log.Print("You are dead :(\n")
+		return []byte("\n")
+	}
+	finalValue := "\n"
 	switch commands[0] {
 	case "help":
 		log.Print(usageString)
@@ -97,16 +141,16 @@ func handleInputString(str string) []byte {
 	case "clear":
 		cmd := exec.Command("clear")
 		cmd.Run()
-	case "attack":
+	case "attack":// attack a player, if bad format, or not alive, give error message
 		if !gameActive {
 			log.Print("Game has not started yet!\n")
-		} else if myHealth == 0 {
-			log.Print("You are dead and cannot attack anymore!\n")
-		} else if len(commands) < 3 {
+		} else if len(commands) < 2 {
 			log.Print("You have not given enough arguments!\n")
-			log.Print("Format: attack [PLAYER NAME] [DAMAGE]\n")
+			log.Print("Format: attack [PLAYER NAME]\n")
+		} else if isPlayerAlive(commands[1]) {
+			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, "; 10\n")
 		} else {
-			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, ";", commands[2], "\n")
+			log.Print(commands[1], "is dead and gone.")
 		}
 	case "name":
 		if len(commands) < 2 {
@@ -140,7 +184,7 @@ func handleInputString(str string) []byte {
 		} else {
 			log.Print("My name: ", myName, "\n")
 			log.Print("Other players:\n")
-			for i:=1; i < len(allPlayers);i++ {//TODO take admin out of print player names
+			for i:=1; i < len(allPlayers);i++ {//TODO take admin out of print player names, then change this i to start at 0
 				log.Print("Player ", i, ": ", allPlayers[i])
 			}
 		}
@@ -223,7 +267,7 @@ func StartClient(host string, port string) {
 
 	log.Println("Connected to ", host+port)
 	log.Println("Welcome to GoWar!!", usageString)
-	allPlayers = append(allPlayers, "admin")
+	allPlayers = append(allPlayers, "admin")//TODO, Asher why do we have admin here?
 	HandleCons(con)
 }
 
