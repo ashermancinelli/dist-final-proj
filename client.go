@@ -32,7 +32,7 @@ func handleGameString(str string) []byte { //handles relevant string data from m
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";") //split strings by ";" separated values
 
-	finalValue := "\n"
+	finalValue := ""
 	switch {
 	case commands[0] == "name":
 		allPlayers = append(allPlayers, commands[1])
@@ -40,7 +40,7 @@ func handleGameString(str string) []byte { //handles relevant string data from m
 	case commands[0] == "meta": //a message type for anything else
 		switch {
 		case commands[1] == "all players":
-			copy(allPlayers, commands[2:])
+			allPlayers = commands[2:]
 			if spectatorMode {
 				finalValue = fmt.Sprint("Updated ", commands[1], " to game state.\n")
 			}
@@ -101,8 +101,7 @@ func handleGameString(str string) []byte { //handles relevant string data from m
 		}
 
 	default:
-		finalValue = "error;command not implemented\n"
-		log.Print("Bad game data: ", str, "\n")
+		finalValue = "error;unhandled tag;" + commands[0] + "\n"
 	}
 	return []byte(finalValue)
 }
@@ -140,7 +139,7 @@ func handleInputString(str string) []byte {
 		if nameSet {
 			log.Print("You can only set your name once!\n")
 		} else if len(commands[1]) > 5 {
-			log.Print("Your name must be 5 characters or less.\n")
+			log.Print("Your name must be 5 characters or less with no special characters.\n")
 		} else {
 			found := false
 			for _, v := range allPlayers {
@@ -169,6 +168,8 @@ func handleInputString(str string) []byte {
 		}
 	case "score":
 		log.Println("Score not implemented yet...")
+    case "spec":
+        spectatorMode = true
 	default:
 		log.Print("Error: Bad input.\n")
 		log.Println(usageString)
