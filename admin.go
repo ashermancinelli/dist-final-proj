@@ -47,13 +47,17 @@ func removePlayer(name string, listName string) { //removes player from  specifi
 	log.Print("Error deleting player ", name, "!")
 }
 
+func printGameStats() string {
+	return "good game/n"//todo
+}
+
 func handleGameString(str string) []byte { //handles relevant string data from messaging system
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";") //split strings by ";" separated values
 
 	finalValue := "\n"
-	switch {
-	case commands[0] == "name": //add new player by name
+	switch commands[0]{
+	case "name": //add new player by name
 		if len(commands) < 2 {
 			return []byte("error; bad name arg\n")
 		}
@@ -61,16 +65,17 @@ func handleGameString(str string) []byte { //handles relevant string data from m
 		points = append(points, 0)
 		alivePlayers = append(alivePlayers, commands[1])
 		finalValue = fmt.Sprint("Adding new player: ", commands[1], "\n")
-	case commands[0] == "death": //reports another players death
+	case "death": //reports another players death
 		if len(commands) < 3 { //error check
 			return []byte("error;bad args;kill\n")
 		}
 		finalValue = fmt.Sprint("Player ", commands[2], " has been killed by ", commands[1], "\n") //output who died
 		givePoints(commands[3], 10)                                                                 //give 10 point to the killer
 		removePlayer(commands[2], "alivePlayers")                                                   //remove the dead person from alive players list
-	default:
-		finalValue = "error;command_not_implemented\n"
-		log.Print("Bad game data: ", str, "\n")
+		//check to see if there are still multiple players in the game, else end game
+
+	default://If not important for admin control, then just output data to screen
+		finalValue = fmt.Sprint(str + "\n")
 	}
 	return []byte(finalValue)
 }
@@ -92,7 +97,8 @@ func handleInputString(str string) []byte { //valid inputs are start and stop,
 			log.Print("game is not yet started\n")
 		} else {
 			gameActive = false
-			finalValue = fmt.Sprint("stop\n")
+			finalValue = fmt.Sprint("Admin has ended the game. ", printGameStats)
+			//TODO implement full stats printout
 		}
 	case "boot": // boot specific player
 		if len(commands) < 2 {
@@ -101,7 +107,13 @@ func handleInputString(str string) []byte { //valid inputs are start and stop,
 		}
 		removePlayer(commands[1], "players")
 		removePlayer(commands[1], "alivePlayers")
-		finalValue = fmt.Sprint(commands[1], " has been booted from game")
+		finalValue = fmt.Sprint("meta;",commands[1], " has been booted from game")//TODO, recieve boot command from client to remove from local list
+	
+	case "meta": //send message to all players
+		if len(commands) < 2{
+			return []byte(finalValue)
+		}
+		finalValue = fmt.Sprint("meta;", commands[1] , "\n")
 	default:
 		finalValue = fmt.Sprint(str + "\n")
 		log.Print("Custom Admin Input set\n")

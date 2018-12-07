@@ -23,3 +23,15 @@ start/stop;
 attack;recieverName;attackerName
 meta;meta details
 
+
+Host.js is run on port 2007
+if running host on computer at the front of the EJ 214 class the local inet = 10.200.100.69
+
+Terminal commands:
+for host type "node host.js"
+
+for admin type "go run admin.go -host 10.200.100.69 -port :2007"
+
+for client type "go run client.go -host 10.200.100.69 -port :2007"
+
+if host is not being run on front of class machine change host ip names to whatever inet value host computer has
