@@ -36,7 +36,12 @@ func isPlayerAlive(name string) bool { //return true if named player is in alive
 	}
 	return false
 }
-
+func printAliveList() {
+	log.Println("Current alive players: \n")
+	for i := range alivePlayers{
+		log.Println(alivePlayers[i])
+	}
+}
 func killPlayer(name string) bool { // takes out player from alive Players list
 	for i := 0; i < len(alivePlayers); i++ {
 		if name == alivePlayers[i] {
@@ -47,8 +52,24 @@ func killPlayer(name string) bool { // takes out player from alive Players list
 	log.Println("Error! player", name, "not in the alive players list\n")
 	return false
 }
-
+func myScore() {
+	if len(allPlayers) != len(playerPoints){
+		log.Println("ERROR players and points arrays not same size\n")
+		return
+	}
+	for i := 0; i < len(allPlayers); i++ {
+		if myName == allPlayers[i] {
+			log.Println(strconv.Itoa(playerPoints[i]) + " Points!\n")
+			return 
+		}
+	}
+	log.Println("Error! You're not in your own list!!!\n")
+}
 func givePoints(name string, points int) { //give points to specific player
+	if len(allPlayers) != len(playerPoints){
+		log.Println("ERROR players and points arrays not same size\n")
+		return
+	}
 	for i := 0; i < len(allPlayers); i++ {
 		if name == allPlayers[i] {
 			playerPoints[i] = playerPoints[i] + points
@@ -58,6 +79,11 @@ func givePoints(name string, points int) { //give points to specific player
 	log.Println("Error in givePoints(),  player", name, "not in the players list\n")
 }
 func outPutScores() string {
+
+	if len(allPlayers) != len(playerPoints){
+		log.Println("ERROR players and points arrays not same size\n")
+		return "err\n"
+	}
 	message := "GAME OVER!!\n"
 	if len(alivePlayers) == 1 {
 		message += "Last living player: " + alivePlayers[0]
@@ -81,17 +107,27 @@ func handleGameString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";") //split strings by ";" separated values
 
-	finalValue := ""
+	finalValue := "\n"
 	switch {
 	case commands[0] == "name":
 		allPlayers = append(allPlayers, commands[1])
 		playerPoints = append(playerPoints, 0)
 		log.Println("New player added.")
 	case commands[0] == "meta": //a message type for anything else
-		if len(commands) < 2 {
-			return []byte("\n")
+		if len(commands) == 2 {
+		finalValue = fmt.Sprint(commands[1], "\n")//if meta should be read as just a message, then print message
+		}else if len(commands) > 2 {
+			if commands[1] == "all players"{//if meta is an update of all
+				allPlayers = commands[2:]
+				for range allPlayers{//make a play point value for each player
+					playerPoints = append(playerPoints,0)
+				}
+				alivePlayers = allPlayers
+				if(spectatorMode){
+					finalValue = fmt.Sprint("Updated players.\n")
+				}
+			}
 		}
-		finalValue = fmt.Sprint(commands[1], "\n")
 	case commands[0] == "start": //start game
 		finalValue = fmt.Sprint("GoWar STARTED!!! \n")
 		gameActive = true
@@ -182,6 +218,8 @@ func handleInputString(str string) []byte {
 			}
 			nameSet = true
 			myName = commands[1]
+			allPlayers = append(allPlayers,myName)
+			playerPoints = append(playerPoints,0)
 			finalValue = fmt.Sprint("name;", commands[1], "\n")
 			log.Println("Name has successfully been set.")
 		}
@@ -189,14 +227,13 @@ func handleInputString(str string) []byte {
 		if len(allPlayers) == 0 {
 			log.Println("No other players have registered on this server yet.")
 		} else {
-			log.Print("My name: ", myName, "\n")
-			log.Print("Other players:\n")
-			for i := 1; i < len(allPlayers); i++ { //TODO take admin out of print player names, then change this i to start at 0
+			log.Print("Players:\n")
+			for i := 0; i < len(allPlayers); i++ { 
 				log.Print("Player ", i, ": ", allPlayers[i])
 			}
 		}
 	case "score":
-		log.Println("Score not implemented yet...")
+		myScore()
 	case "spec":
 		spectatorMode = true
 	default:
@@ -274,7 +311,6 @@ func StartClient(host string, port string) {
 
 	log.Println("Connected to ", host+port)
 	log.Println("Welcome to GoWar!!", usageString)
-	allPlayers = append(allPlayers, "admin") //TODO, Asher why do we have admin here?
 	HandleCons(con)
 }
 
