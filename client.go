@@ -36,12 +36,14 @@ func isPlayerAlive(name string) bool { //return true if named player is in alive
 	}
 	return false
 }
+
 func printAliveList() {
 	log.Println("Current alive players: \n")
 	for i := range alivePlayers {
 		log.Println(alivePlayers[i])
 	}
 }
+
 func killPlayer(name string) bool { // takes out player from alive Players list
 	for i := 0; i < len(alivePlayers); i++ {
 		if name == alivePlayers[i] {
@@ -52,6 +54,7 @@ func killPlayer(name string) bool { // takes out player from alive Players list
 	log.Println("Error! player", name, "not in the alive players list\n")
 	return false
 }
+
 func playerScore(name string) int { //returns score for given player
 	if len(allPlayers) != len(playerPoints) {
 		log.Println("ERROR players and points arrays not same size\n")
@@ -65,6 +68,7 @@ func playerScore(name string) int { //returns score for given player
 	log.Println("Error! You're not in your own list!!!\n")
 	return 0
 }
+
 func givePoints(name string, points int) { //give points to specific player
 	if len(allPlayers) != len(playerPoints) {
 		log.Println("ERROR players and points arrays not same size\n")
@@ -78,6 +82,7 @@ func givePoints(name string, points int) { //give points to specific player
 	}
 	log.Println("Error in givePoints(),  player", name, "not in the players list\n")
 }
+
 func outPutScores() string {
 
 	if len(allPlayers) != len(playerPoints) {
@@ -159,7 +164,7 @@ func handleGameString(str string) []byte {
 				mykiller = commands[2]
 				myHealth = 0
 				spectatorMode = true
-				//TODO: report to system thatplayer died
+				//TODO: report to system that player died
 			}
 		}
 
