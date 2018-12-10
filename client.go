@@ -17,15 +17,16 @@ const (
 )
 
 var (
-	allPlayers    []string
-	playerPoints  []int
-	alivePlayers  []string
-	myName        = "placeholder"
-	nameSet       = false
-	gameActive    = false
-	myHealth      = 100
-	mykiller      = "stillAlive"
-	spectatorMode = false
+	allPlayers       []string
+	playerPoints     []int
+	alivePlayers     []string
+	myName           = "placeholder"
+	nameSet          = false
+	gameActive       = false
+	myHealth         = 100
+	mykiller         = "stillAlive"
+	spectatorMode    = false
+	sendDeathMessage = false
 )
 
 func isPlayerAlive(name string) bool { //return true if named player is in alivePlayers list, false if not
@@ -157,6 +158,7 @@ func handleGameString(str string) []byte {
 			} else {
 				finalValue = fmt.Sprint("You were killed by ", commands[2], "!!!\n")
 				mykiller = commands[2]
+				sendDeathMessage = true
 				myHealth = 0
 				spectatorMode = true
 				//TODO: report to system thatplayer died
@@ -173,9 +175,14 @@ func handleGameString(str string) []byte {
 func handleInputString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, " ")
+	if sendDeathMessage { //if they died then first loop will send death message once
+		return []byte(fmt.Sprint("death;", myName, ";", mykiller, "\n"))
+		sendDeathMessage = false
+
+	}
 	if myHealth == 0 { //check first to see if player is still alive
 		log.Print("You are dead :(\n")
-		return []byte(fmt.Sprint("death;", myName, ";", mykiller, "\n"))
+		return []byte(fmt.Sprint("\n"))
 	}
 	finalValue := "\n"
 	switch commands[0] {
