@@ -7,9 +7,9 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
+	"math/rand"
 )
 
 const (
@@ -203,7 +203,9 @@ func handleInputString(str string) []byte {
 			log.Print("You have not given enough arguments!\n")
 			log.Print("Format: attack [PLAYER NAME]\n")
 		} else if isPlayerAlive(commands[1]) {
-			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, "; 10\n")
+			atk := rand.Intn(15)
+			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, ";", atk, "\n")
+			log.Println("Attack successful for ", atk, " damage.")
 		} else {
 			log.Print(commands[1], "is dead and gone.")
 		}
