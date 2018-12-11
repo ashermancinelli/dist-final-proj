@@ -14,7 +14,12 @@ goWar Battle Royale.
 
 ### To play:
 
-To play goWar, watch the console for any damage taken while typing in the name of an enemy to attack. 
+To play goWar, watch the console for any damage taken. 
+To attack someone, run `attack [PLAYER NAME]`
+
+To list the players currently on the server, run `list`
+
+To see your score, run `score`
 
 ## Technical details:
 
