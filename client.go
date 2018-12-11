@@ -230,15 +230,18 @@ func handleInputString(str string) []byte {
 					found = true
 				}
 			}
+
 			if found {
 				break
+			} else {
+				nameSet = true
+				myName = commands[1]
+				allPlayers = append(allPlayers, myName)
+				playerPoints = append(playerPoints, 0)
+				finalValue = fmt.Sprint("name;", commands[1], "\n")
+				log.Println("Name has successfully been set.")
 			}
-			nameSet = true
-			myName = commands[1]
-			allPlayers = append(allPlayers, myName)
-			playerPoints = append(playerPoints, 0)
-			finalValue = fmt.Sprint("name;", commands[1], "\n")
-			log.Println("Name has successfully been set.")
+
 		}
 	case "list": //lists all players in the server
 		if len(allPlayers) == 0 {

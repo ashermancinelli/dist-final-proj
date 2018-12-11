@@ -74,7 +74,7 @@ net.createServer(sock => {
     });
 }).listen(port);
 
-console.log('Listening on port: ' + port + ' with debug mode: ' + debug);
+console.log('Listening on port: ' + port);
 
 
 
