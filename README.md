@@ -2,8 +2,7 @@
 
 # Welcome to GoWar!!
 
-## Game mode 1:
-goWar Battle Royale.
+Text-based battle royale game. Currently configured to run on local network, however the host could easily be port forewarded to be served publicly for online play. Each player seeks to attack other players and do the most total damage in the game. The last player alive may not be the winner. 
 
 ### Setup:
  `git clone https://github.com/ashermancinelli/dist-final-proj.git`
