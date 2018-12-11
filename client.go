@@ -7,9 +7,9 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
+	"math/rand"
 )
 
 const (
@@ -113,7 +113,7 @@ func handleGameString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";") //split strings by ";" separated values
 
-	finalValue := "\n"
+	finalValue := ""
 	switch {
 	case commands[0] == "name":
 		allPlayers = append(allPlayers, commands[1])
@@ -124,9 +124,10 @@ func handleGameString(str string) []byte {
 			finalValue = fmt.Sprint(commands[1], "\n") //if meta should be read as just a message, then print message
 		} else if len(commands) > 2 {
 			if commands[1] == "all players" { //if meta is an update of all
-				allPlayers = commands[2:]
-				for range allPlayers { //make a play point value for each player
-					playerPoints = append(playerPoints, 0)
+				allPlayers = commands[2:]//recreate list of players
+				playerPoints :=make([]int,len(allPlayers))//clears points then recreate in loop below
+				for i:= range allPlayers { //make a list of player points all starting off at 0
+					playerPoints[i] = 100
 				}
 				alivePlayers = allPlayers
 				if spectatorMode {
@@ -137,7 +138,7 @@ func handleGameString(str string) []byte {
 	case commands[0] == "start": //start game
 		finalValue = fmt.Sprint("GoWar STARTED!!! \n")
 		gameActive = true
-	case commands[0] == "stop":
+	case commands[0] == "stop"://stop game and output scores
 		if gameActive {
 			finalValue = fmt.Sprint(outPutScores()) //print game results given in stop command
 			gameActive = false
@@ -163,15 +164,16 @@ func handleGameString(str string) []byte {
 			} else {
 				finalValue = fmt.Sprint("You were killed by ", commands[2], "!!!\n")
 				mykiller = commands[2]
+				killPlayer(myName)
 				sendDeathMessage = true
 				myHealth = 0
 				spectatorMode = true
 				//TODO: report to system that player died
 			}
 		}
-
 	default:
-		finalValue = "error;unhandled tag;" + commands[0] + "\n"
+		// finalValue = "error;unhandled tag;" + commands[0] + "\n"
+		finalValue = ""
 	}
 	return []byte(finalValue)
 }
@@ -181,8 +183,8 @@ func handleInputString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, " ")
 	if sendDeathMessage { //if they died then first loop will send death message once
-		return []byte(fmt.Sprint("death;", myName, ";", mykiller, "\n"))
 		sendDeathMessage = false
+		return []byte(fmt.Sprint("death;", myName, ";", mykiller, "\n"))
 
 	}
 	if myHealth == 0 { //check first to see if player is still alive
@@ -195,9 +197,6 @@ func handleInputString(str string) []byte {
 		log.Print(usageString)
 	case "raw": //enter custom data without user error thrown, hackers here ya go :)
 		finalValue = commands[1] + "\n"
-	case "clear": //clear console
-		cmd := exec.Command("clear")
-		cmd.Run()
 	case "attack": // attack a player, if bad format, or not alive, give error message
 		if !gameActive {
 			log.Print("Game has not started yet!\n")
@@ -205,7 +204,10 @@ func handleInputString(str string) []byte {
 			log.Print("You have not given enough arguments!\n")
 			log.Print("Format: attack [PLAYER NAME]\n")
 		} else if isPlayerAlive(commands[1]) {
-			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, "; 10\n")
+			atk := rand.Intn(15)
+			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, ";", atk, "\n")
+			log.Println("Attack successful for ", atk, " damage.")
+			givePoints(myName,atk)
 		} else {
 			log.Print(commands[1], " is dead and gone.")
 		}
@@ -247,7 +249,7 @@ func handleInputString(str string) []byte {
 			}
 		}
 	case "score": //return players score
-		finalValue = fmt.Sprint("My score: ", strconv.Itoa(playerScore(myName)), "\n")
+		log.Println("My score: ", strconv.Itoa(playerScore(myName)))
 	case "spec": //enter spectator mode
 		myHealth = 0
 		spectatorMode = true
