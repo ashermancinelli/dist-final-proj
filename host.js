@@ -24,13 +24,16 @@ var points;
 var port = 2007; 
 var stdin = process.openStdin();
 var started = false;
+var deadCount = 0;
 
 syncNames = () => 'meta;all players;' + names.join(';') + '\n';
 
 printScore = () => {
     var score = '\n\nScore:\n--------------------\n';
-    names.forEach(c => score += c + '\t\t' + points[names.indexOf(c)] + '\n');
-    return score;
+    for (var i = 0; i < names.length; i++) {
+        score += names[i] + '\t\t' + points[i] + '\n\n';
+    }
+    return score + '\n\n\n';
 }
 
 process.argv.forEach( arg => {
@@ -75,12 +78,12 @@ net.createServer(sock => {
             names.push(d.split(';')[1]);
             process.stdout.write('Received name from command: ' + d + '\n');
         } else if (d.split(';')[0] === 'death') {
-            names.splice( names.indexOf( d.split(';')[1] ), 1 );
-            if (names.length < 2) {
+            deadCount++;
+            if (names.length - deadCount < 2) {
                 broadcast("stop;" + printScore(), 'admin')
             }
         } else if (d.split(';')[0] === 'attack') {
-            points[points.indexOf(d.split(';')[0])] += parseInt(d.split(';')[1]);
+            points[names.indexOf(d.split(';')[2])] += parseInt(d.split(';')[3]);
         }
 
     });
