@@ -1,6 +1,6 @@
 package main
 
-import (
+import (//import all needed libraries
 	"flag"
 	"fmt"
 	"io"
@@ -13,11 +13,11 @@ import (
 	"time"
 )
 
-const (
+const (//a constant string that shows the possible commands (or at least the ones we want the user to know about )
 	usageString string = "\n\nPossible commands:\nhelp\t\tDisplay this message.\nlist\t\tList all active players.\nattack\t\tAttack some player.\nname\t\tSet your name. Can only be called once.\nscore\t\tOutput current score of game."
 )
 
-var (
+var (//player specific variables
 	allPlayers       []string
 	playerPoints     int
 	alivePlayers     []string
@@ -31,15 +31,15 @@ var (
 )
 
 func isPlayerAlive(name string) bool { //return true if named player is in alivePlayers list, false if not
-	for i := 0; i < len(alivePlayers); i++ {
+	for i := 0; i < len(alivePlayers); i++ {//look through whole alive list to see if given player is in there
 		if name == alivePlayers[i] {
 			return true
 		}
 	}
-	return false
+	return false//player was not found in list
 }
 
-func printAliveList() {
+func printAliveList() {//print off list of all alive players
 	log.Println("Current alive players: \n")
 	for i := range alivePlayers {
 		log.Println(alivePlayers[i])
@@ -54,7 +54,7 @@ func killPlayer(name string) bool { // takes out player from alive Players list
 		}
 	}
 	log.Println("Error! player", name, "not in the alive players list\n")
-	return false
+	return false// player was not found in alive players list
 }
 
 //handles information given from public record and handles relevate data
@@ -62,7 +62,7 @@ func handleGameString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";") //split strings by ";" separated values
 
-	finalValue := ""
+	finalValue := ""//default output value should be nothingli
 	switch {
 	case commands[0] == "name":
 		allPlayers = append(allPlayers, commands[1])
@@ -95,10 +95,10 @@ func handleGameString(str string) []byte {
 		finalValue = fmt.Sprint("Player ", commands[1], " has been killed by ", commands[2], "\n") //output who died
 		killPlayer(commands[1])
 	case commands[0] == "attack": //a player was attacked
-		if len(commands) < 4 {
+		if len(commands) < 4 {//error check
 			return []byte("error;bad args;attack\n")
 		}
-		if spectatorMode {
+		if spectatorMode {//spectator mode allows players to watch non relevant attacks
 			log.Println(commands[1], " was attacked by ", commands[2], " for ", commands[3], "damage.\n")
 		} else if commands[1] == myName { //if this player was attacked
 			damage, _ := strconv.Atoi(commands[3])
@@ -112,7 +112,6 @@ func handleGameString(str string) []byte {
 				sendDeathMessage = true
 				myHealth = 0
 				spectatorMode = true
-				//TODO: report to system that player died
 			}
 		}
 	default:
@@ -191,10 +190,6 @@ func handleInputString(str string) []byte {
 			log.Print("Players:\n")
 			for i := 0; i < len(allPlayers); i++ {
 				log.Print("Player ", i, ": ", allPlayers[i])
-			}
-			log.Print("\n Players Still alive:\n")
-			for i := 0; i < len(allPlayers); i++ {
-				log.Print("Player ", i, ": ", alivePlayers[i])
 			}
 		}
 	case "score": //return players score
