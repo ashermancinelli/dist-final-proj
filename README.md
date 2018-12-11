@@ -15,11 +15,11 @@ goWar Battle Royale.
 ### To play:
 
 To play goWar, watch the console for any damage taken. 
-To attack someone, run `attack [PLAYER NAME]`
+To attack someone, run `attack [PLAYER NAME]` in the client console.
 
-To list the players currently on the server, run `list`
+To list the players currently on the server, run `list` in the client console.
 
-To see your score, run `score`
+To see your score, run `score` in the client console.
 
 ## Technical details:
 
@@ -38,8 +38,6 @@ See Tom or Asher in class. `host.js`
 if running host on computer at the front of the EJ 214 class the local inet = `10.200.100.69`
 
 Terminal commands:
-for host run `node host.js`
+for host run `node host.js` to let port be set to the default of `2007`. Otherwise, run `node host.js port=[PORT NUMBER]`
 
-for client run `go run client.go -host 10.200.100.69 -port :2007`
-
-if host is not being run on front of class machine change host ip names to whatever inet value host computer has.
+for client run `go run client.go -host [HOST NAME] -port :[PORT NAME]`
