@@ -28,7 +28,9 @@ goWar Battle Royale is played by 2 or more players. Each player connects to a ho
 Communication on server takes the form:
 
 
-- `type;data1;data2;data3...`
+`type;data1;data2;data3...`. 
+For example, 
+
 - `start/stop;`
 - `attack;recieverName;attackerName`
 - `meta;meta details`
