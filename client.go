@@ -1,25 +1,25 @@
 package main
 
-import (//import all needed libraries
+import ( //import all needed libraries
 	"flag"
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"strconv"
 	"strings"
-	"math/rand"
 	"time"
 )
 
-const (//a constant string that shows the possible commands (or at least the ones we want the user to know about )
+const ( //a constant string that shows the possible commands (or at least the ones we want the user to know about )
 	usageString string = "\n\nPossible commands:\nhelp\t\tDisplay this message.\nlist\t\tList all active players.\nattack\t\tAttack some player.\nname\t\tSet your name. Can only be called once.\nscore\t\tOutput current score of game."
 )
 
-var (//player specific variables
-	allPlayers       []string
-	playerPoints     int
+var ( //player specific variables
+	allPlayers       []string //list of all players in game
+	playerPoints     int      //amount of points player has earned
 	myName           = "placeholder"
 	nameSet          = false
 	gameActive       = false
@@ -29,14 +29,13 @@ var (//player specific variables
 	sendDeathMessage = false
 )
 
-
 func isPlayerAlive(name string) bool { //return true if named player is in alivePlayers list, false if not
-	for i := 0; i < len(allPlayers); i++ {//look through whole alive list to see if given player is in there
+	for i := 0; i < len(allPlayers); i++ { //look through whole alive list to see if given player is in there
 		if name == allPlayers[i] {
 			return true
 		}
 	}
-	return false//player was not found in list
+	return false //player was not found in list
 }
 
 ////print alive players function not needed
@@ -56,7 +55,7 @@ func killPlayer(name string) bool { // takes out player from alive Players list
 		}
 	}
 	log.Println("Error! player", name, "not in the alive players list\n")
-	return false// player was not found in alive players list
+	return false // player was not found in alive players list
 }
 
 //handles information given from public record and handles relevate data
@@ -64,7 +63,7 @@ func handleGameString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";") //split strings by ";" separated values
 
-	finalValue := ""//default output value should be nothingli
+	finalValue := "" //default output value should be nothingli
 	switch {
 	case commands[0] == "name":
 		log.Println("New player added.")
@@ -82,7 +81,7 @@ func handleGameString(str string) []byte {
 	case commands[0] == "start": //start game
 		finalValue = fmt.Sprint("GoWar STARTED!!! \n")
 		gameActive = true
-	case commands[0] == "stop"://stop game and output scores
+	case commands[0] == "stop": //stop game and output scores
 		if gameActive {
 			finalValue = fmt.Sprint(commands[1]) //print game results given in stop command
 			log.Println("\n\n")
@@ -96,10 +95,10 @@ func handleGameString(str string) []byte {
 		finalValue = fmt.Sprint("Player ", commands[1], " has been killed by ", commands[2], "\n") //output who died
 		killPlayer(commands[1])
 	case commands[0] == "attack": //a player was attacked
-		if len(commands) < 4 {//error check
+		if len(commands) < 4 { //error check
 			return []byte("error;bad args;attack\n")
 		}
-		if spectatorMode {//spectator mode allows players to watch non relevant attacks
+		if spectatorMode { //spectator mode allows players to watch non relevant attacks
 			log.Println(commands[1], " was attacked by ", commands[2], " for ", commands[3], "damage.\n")
 		} else if commands[1] == myName { //if this player was attacked
 			damage, _ := strconv.Atoi(commands[3])
@@ -148,7 +147,7 @@ func handleInputString(str string) []byte {
 			log.Print("You have not given enough arguments!\n")
 			log.Print("Format: attack [PLAYER NAME]\n")
 		} else if isPlayerAlive(commands[1]) {
-			atk := rand.Intn(150)
+			atk := rand.Intn(15)
 			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, ";", atk, "\n")
 			log.Println("Attack successful for ", atk, " damage.")
 			playerPoints += atk
@@ -168,7 +167,7 @@ func handleInputString(str string) []byte {
 		} else {
 			// // This is a breaking change becuase we cannot sync the names of all the
 			// // players until the game begins
-			
+
 			// found := false
 			// for _, v := range allPlayers {
 			// 	if v == commands[1] {
@@ -243,7 +242,6 @@ func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
 			}
 
 			_, err = dst.Write(data)
-			
 
 			if err != nil {
 				log.Fatalf("Write error: %s\n", err)
