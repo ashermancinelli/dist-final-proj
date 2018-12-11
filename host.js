@@ -20,11 +20,18 @@ https://gist.github.com/creationix/707146
 net = require('net');
 var clients = [];
 var names = [];
+var points;
 var port = 2007; 
 var stdin = process.openStdin();
 var started = false;
 
 syncNames = () => 'meta;all players;' + names.join(';') + '\n';
+
+printScore = () => {
+    var score = '\n\nScore:\n--------------------\n';
+    names.forEach(c => score += c + '\t\t' + points[names.indexOf(c)] + '\n');
+    return score;
+}
 
 process.argv.forEach( arg => {
     if (arg.includes('port')) {
@@ -45,6 +52,7 @@ stdin.addListener('data', d => {
         d = syncNames();
     } else if (d === 'start') {
         started = true;
+        points = new Array(names.length).fill(0);
         broadcast(syncNames(), 'admin');
         d = 'start\n'
     }
@@ -63,12 +71,16 @@ net.createServer(sock => {
         d = data.toString().trim();
 
         // if a new name is added to the server, append to the 
-        if (d.split(';')[0] === 'name' && !started) names.push(d.split(';')[1]);
-        if (d.split(';')[0] === 'death') {
-            list.splice( list.indexOf( d.split(';')[1] ), 1 );
+        if (d.split(';')[0] === 'name' && !started) {
+            names.push(d.split(';')[1]);
+            process.stdout.write('Received name from command: ' + d + '\n');
+        } else if (d.split(';')[0] === 'death') {
+            names.splice( names.indexOf( d.split(';')[1] ), 1 );
             if (names.length < 2) {
-                broadcast("stop\n", 'admin')
+                broadcast("stop;" + printScore(), 'admin')
             }
+        } else if (d.split(';')[0] === 'attack') {
+            points[points.indexOf(d.split(';')[0])] += parseInt(d.split(';')[1]);
         }
 
     });
