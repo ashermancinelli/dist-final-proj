@@ -182,8 +182,8 @@ func handleInputString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, " ")
 	if sendDeathMessage { //if they died then first loop will send death message once
-		return []byte(fmt.Sprint("death;", myName, ";", mykiller, "\n"))
 		sendDeathMessage = false
+		return []byte(fmt.Sprint("death;", myName, ";", mykiller, "\n"))
 
 	}
 	if myHealth == 0 { //check first to see if player is still alive
