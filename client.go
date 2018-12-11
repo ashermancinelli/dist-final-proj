@@ -107,14 +107,13 @@ func outPutScores() string {
 	}
 	return message
 }
-//TODO HANDLE EMPTY STRING
-//TODO make host be able to start game
+
 //handles information given from public record and handles relevate data
 func handleGameString(str string) []byte {
 	str = strings.TrimSpace(str)
 	commands := strings.Split(str, ";") //split strings by ";" separated values
 
-	finalValue := "\n"
+	finalValue := ""
 	switch {
 	case commands[0] == "name":
 		allPlayers = append(allPlayers, commands[1])
@@ -171,10 +170,9 @@ func handleGameString(str string) []byte {
 				//TODO: report to system that player died
 			}
 		}
-	case commands[0]== "\n":
-		finalValue = fmt.Sprint("\n")
 	default:
-		finalValue = "error;unhandled tag;" + commands[0] + "\n"
+		// finalValue = "error;unhandled tag;" + commands[0] + "\n"
+		finalValue = ""
 	}
 	return []byte(finalValue)
 }
