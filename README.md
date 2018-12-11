@@ -7,7 +7,9 @@ goWar Battle Royale.
 
 ### Setup:
  `git clone https://github.com/ashermancinelli/dist-final-proj.git`
+ 
  `cd dist-final-proj`
+ 
  `. run`
 
 ### To play:
