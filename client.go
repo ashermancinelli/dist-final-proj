@@ -107,7 +107,8 @@ func outPutScores() string {
 	}
 	return message
 }
-
+//TODO HANDLE EMPTY STRING
+//TODO make host be able to start game
 //handles information given from public record and handles relevate data
 func handleGameString(str string) []byte {
 	str = strings.TrimSpace(str)
@@ -124,9 +125,10 @@ func handleGameString(str string) []byte {
 			finalValue = fmt.Sprint(commands[1], "\n") //if meta should be read as just a message, then print message
 		} else if len(commands) > 2 {
 			if commands[1] == "all players" { //if meta is an update of all
-				allPlayers = commands[2:]
-				for range allPlayers { //make a play point value for each player
-					playerPoints = append(playerPoints, 0)
+				allPlayers = commands[2:]//recreate list of players
+				playerPoints :=make([]int,len(allPlayers))//clears points then recreate in loop below
+				for i:= range allPlayers { //make a list of player points all starting off at 0
+					playerPoints[i] = 100
 				}
 				alivePlayers = allPlayers
 				if spectatorMode {
@@ -137,7 +139,7 @@ func handleGameString(str string) []byte {
 	case commands[0] == "start": //start game
 		finalValue = fmt.Sprint("GoWar STARTED!!! \n")
 		gameActive = true
-	case commands[0] == "stop":
+	case commands[0] == "stop"://stop game and output scores
 		if gameActive {
 			finalValue = fmt.Sprint(outPutScores()) //print game results given in stop command
 			gameActive = false
@@ -169,7 +171,8 @@ func handleGameString(str string) []byte {
 				//TODO: report to system that player died
 			}
 		}
-
+	case commands[0]== "\n":
+		finalValue = fmt.Sprint("\n")
 	default:
 		finalValue = "error;unhandled tag;" + commands[0] + "\n"
 	}
@@ -247,7 +250,7 @@ func handleInputString(str string) []byte {
 			}
 		}
 	case "score": //return players score
-		finalValue = fmt.Sprint("My score: ", strconv.Itoa(playerScore(myName)), "\n")
+		log.Println("My score: ", strconv.Itoa(playerScore(myName)), "\n")
 	case "spec": //enter spectator mode
 		myHealth = 0
 		spectatorMode = true
