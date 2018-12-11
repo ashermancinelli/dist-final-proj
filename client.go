@@ -19,7 +19,7 @@ const (
 
 var (
 	allPlayers       []string
-	playerPoints     []int
+	playerPoints     int
 	alivePlayers     []string
 	myName           = "placeholder"
 	nameSet          = false
@@ -57,58 +57,6 @@ func killPlayer(name string) bool { // takes out player from alive Players list
 	return false
 }
 
-func playerScore(name string) int { //returns score for given player
-	if len(allPlayers) != len(playerPoints) {
-		log.Println("ERROR players and points arrays not same size\n")
-		return 0
-	}
-	for i := 0; i < len(allPlayers); i++ {
-		if myName == allPlayers[i] {
-			return playerPoints[i]
-		}
-	}
-	log.Println("Error! You're not in your own list!!!\n")
-	return 0
-}
-
-func givePoints(name string, points int) { //give points to specific player
-	if len(allPlayers) != len(playerPoints) {
-		log.Println("ERROR players and points arrays not same size\n")
-		return
-	}
-	for i := 0; i < len(allPlayers); i++ {
-		if name == allPlayers[i] {
-			playerPoints[i] = playerPoints[i] + points
-			return
-		}
-	}
-	log.Println("Error in givePoints(),  player", name, "not in the players list\n")
-}
-
-func outPutScores() string {
-
-	if len(allPlayers) != len(playerPoints) {
-		log.Println("ERROR players and points arrays not same size\n")
-		return "err\n"
-	}
-	message := "GAME OVER!!\n"
-	if len(alivePlayers) == 1 {
-		message += "Last living player: " + alivePlayers[0]
-	} else if len(alivePlayers) > 1 {
-		message += "Players left standing:"
-		for i := 0; i < len(alivePlayers); i++ {
-			message += alivePlayers[i] + ", "
-		}
-	} else {
-		message += "NO players left standing!"
-	}
-	message += "\n Score Board \n ----------------------------\n"
-	for i := 0; i < len(allPlayers); i++ {
-		message += allPlayers[i] + "--------" + strconv.Itoa(playerPoints[i]) + "\n"
-	}
-	return message
-}
-
 //handles information given from public record and handles relevate data
 func handleGameString(str string) []byte {
 	str = strings.TrimSpace(str)
@@ -125,10 +73,6 @@ func handleGameString(str string) []byte {
 		} else if len(commands) > 2 {
 			if commands[1] == "all players" { //if meta is an update of all
 				allPlayers = commands[2:] //recreate list of players
-				playerPoints = make([]int,len(allPlayers))
-				for i, _ := range playerPoints{
-					playerPoints[i] = 0
-				}
 				alivePlayers = allPlayers
 				if spectatorMode {
 					finalValue = fmt.Sprint("Updated players.\n")
@@ -140,7 +84,7 @@ func handleGameString(str string) []byte {
 		gameActive = true
 	case commands[0] == "stop"://stop game and output scores
 		if gameActive {
-			finalValue = fmt.Sprint(outPutScores()) //print game results given in stop command
+			finalValue = fmt.Sprint(commands[1]) //print game results given in stop command
 			gameActive = false
 		}
 
@@ -195,7 +139,7 @@ func handleInputString(str string) []byte {
 	switch commands[0] {
 	case "help": //print list of usable commands
 		log.Print(usageString)
-	case "raw": //enter custom data without user error thrown, hackers here ya go :)
+	case "hackyhackhack": //enter custom data without user error thrown, hackers here ya go :)
 		finalValue = commands[1] + "\n"
 	case "attack": // attack a player, if bad format, or not alive, give error message
 		if !gameActive {
@@ -207,7 +151,7 @@ func handleInputString(str string) []byte {
 			atk := rand.Intn(15)
 			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, ";", atk, "\n")
 			log.Println("Attack successful for ", atk, " damage.")
-			givePoints(myName,atk)
+			playerPoints += atk
 		} else {
 			log.Print(commands[1], " is dead and gone.")
 		}
@@ -237,7 +181,6 @@ func handleInputString(str string) []byte {
 			nameSet = true
 			myName = commands[1]
 			allPlayers = append(allPlayers, myName)
-			playerPoints = append(playerPoints, 0)
 			finalValue = fmt.Sprint("name;", commands[1], "\n")
 			log.Println("Name has successfully been set.")
 		}
@@ -249,9 +192,13 @@ func handleInputString(str string) []byte {
 			for i := 0; i < len(allPlayers); i++ {
 				log.Print("Player ", i, ": ", allPlayers[i])
 			}
+			log.Print("\n Players Still alive:\n")
+			for i := 0; i < len(allPlayers); i++ {
+				log.Print("Player ", i, ": ", alivePlayers[i])
+			}
 		}
 	case "score": //return players score
-		log.Println("My score: ", strconv.Itoa(playerScore(myName)))
+		log.Println("My score: ", strconv.Itoa(playerPoints))
 	case "spec": //enter spectator mode
 		myHealth = 0
 		spectatorMode = true
