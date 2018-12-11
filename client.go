@@ -196,9 +196,6 @@ func handleInputString(str string) []byte {
 		log.Print(usageString)
 	case "raw": //enter custom data without user error thrown, hackers here ya go :)
 		finalValue = commands[1] + "\n"
-	case "clear": //clear console
-		cmd := exec.Command("clear")
-		cmd.Run()
 	case "attack": // attack a player, if bad format, or not alive, give error message
 		if !gameActive {
 			log.Print("Game has not started yet!\n")
@@ -248,7 +245,7 @@ func handleInputString(str string) []byte {
 			}
 		}
 	case "score": //return players score
-		log.Println("My score: ", strconv.Itoa(playerScore(myName)), "\n")
+		log.Println("My score: ", strconv.Itoa(playerScore(myName)))
 	case "spec": //enter spectator mode
 		myHealth = 0
 		spectatorMode = true
