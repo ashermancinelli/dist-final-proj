@@ -33,6 +33,9 @@ printScore = () => {
     for (var i = 0; i < names.length; i++) {
         score += names[i] + '\t\t' + points[i] + '\n\n';
     }
+    var maxIdx = points.indexOf(Math.max.apply(null, points));
+    var winner = names[maxIdx];
+    score += 'Winner is: ' + winner + '!!!\n'
     return score + '\n\n\n';
 }
 
@@ -90,14 +93,3 @@ net.createServer(sock => {
 }).listen(port);
 
 console.log('Listening on port: ' + port);
-
-
-
-
-
-
-
-
-
-
-
