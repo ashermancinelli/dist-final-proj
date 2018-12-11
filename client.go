@@ -65,7 +65,6 @@ func handleGameString(str string) []byte {
 	finalValue := ""//default output value should be nothingli
 	switch {
 	case commands[0] == "name":
-		allPlayers = append(allPlayers, commands[1])
 		log.Println("New player added.")
 	case commands[0] == "meta": //a message type for anything else
 		if len(commands) == 2 {
@@ -147,7 +146,7 @@ func handleInputString(str string) []byte {
 			log.Print("You have not given enough arguments!\n")
 			log.Print("Format: attack [PLAYER NAME]\n")
 		} else if isPlayerAlive(commands[1]) {
-			atk := rand.Intn(15)
+			atk := rand.Intn(150)
 			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, ";", atk, "\n")
 			log.Println("Attack successful for ", atk, " damage.")
 			playerPoints += atk
@@ -165,21 +164,24 @@ func handleInputString(str string) []byte {
 		} else if len(commands[1]) > 5 {
 			log.Print("Your name must be 5 characters or less with no special characters.\n")
 		} else {
-			found := false
-			for _, v := range allPlayers {
-				if v == commands[1] {
-					log.Println("Another player has already taken that name!")
-					found = true
-				}
-			}
+			// // This is a breaking change becuase we cannot sync the names of all the
+			// // players until the game begins
+			
+			// found := false
+			// for _, v := range allPlayers {
+			// 	if v == commands[1] {
+			// 		log.Println("Another player has already taken that name!")
+			// 		found = true
+			// 	}
+			// }
 
-			if found {
-				break
-			}
+			// if found {
+			// 	break
+			// }
 
 			nameSet = true
 			myName = commands[1]
-			allPlayers = append(allPlayers, myName)
+			// allPlayers = append(allPlayers, myName)
 			finalValue = fmt.Sprint("name;", commands[1], "\n")
 			log.Println("Name has successfully been set.")
 		}
