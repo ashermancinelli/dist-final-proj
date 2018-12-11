@@ -70,7 +70,7 @@ net.createServer(sock => {
 
     sock.on('data', data => {
         broadcast(data, sock);
-        process.stdout.write('INTERNAL: ' + data.toString().trim() + ' FROM: ' + sock.name + '\n');
+        process.stdout.write('INTERNAL:\t\t' + data.toString().trim() + '\t\tFROM: ' + sock.name + '\n');
         d = data.toString().trim();
 
         // if a new name is added to the server, append to the 
