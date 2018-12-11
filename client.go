@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"math/rand"
+	"time"
 )
 
 const (
@@ -125,9 +126,9 @@ func handleGameString(str string) []byte {
 		} else if len(commands) > 2 {
 			if commands[1] == "all players" { //if meta is an update of all
 				allPlayers = commands[2:]//recreate list of players
-				playerPoints :=make([]int,len(allPlayers))//clears points then recreate in loop below
+				playerPoints :=playerPoints[:0]//clears points then recreate in loop below
 				for i:= range allPlayers { //make a list of player points all starting off at 0
-					playerPoints[i] = 100
+					playerPoints = append(playerPoints,0)
 				}
 				alivePlayers = allPlayers
 				if spectatorMode {
@@ -333,6 +334,7 @@ func StartClient(host string, port string) {
 
 func main() {
 
+	rand.Seed(time.Now().UTC().UnixNano())
 	var host, port string
 	flag.StringVar(&host, "host", "", "Remote host to connect to")
 	flag.StringVar(&port, "port", ":8080", "Port of remote host")
