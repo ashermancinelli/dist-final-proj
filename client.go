@@ -20,7 +20,6 @@ const (//a constant string that shows the possible commands (or at least the one
 var (//player specific variables
 	allPlayers       []string
 	playerPoints     int
-	alivePlayers     []string
 	myName           = "placeholder"
 	nameSet          = false
 	gameActive       = false
@@ -30,27 +29,29 @@ var (//player specific variables
 	sendDeathMessage = false
 )
 
+
 func isPlayerAlive(name string) bool { //return true if named player is in alivePlayers list, false if not
-	for i := 0; i < len(alivePlayers); i++ {//look through whole alive list to see if given player is in there
-		if name == alivePlayers[i] {
+	for i := 0; i < len(allPlayers); i++ {//look through whole alive list to see if given player is in there
+		if name == allPlayers[i] {
 			return true
 		}
 	}
 	return false//player was not found in list
 }
 
-func printAliveList() {//print off list of all alive players
-	log.Println("Current alive players: \n")
-	for i := range alivePlayers {
-		log.Println(alivePlayers[i])
-	}
-}
+////print alive players function not needed
+// func printAliveList() {//print off list of all alive players
+// 	log.Println("Current alive players: \n")
+// 	for i := range alivePlayers {
+// 		log.Println(alivePlayers[i])
+// 	}
+// }
 
 func killPlayer(name string) bool { // takes out player from alive Players list
-	for i := 0; i < len(alivePlayers); i++ {
-		if name == alivePlayers[i] {
+	for i := 0; i < len(allPlayers); i++ {
+		if name == allPlayers[i] {
 			// alivePlayers = append(alivePlayers[:i], alivePlayers[i+1:]...) //take out player from list
-			alivePlayers[i] += " <DEAD> "
+			allPlayers[i] += " <DEAD> "
 			return true
 		}
 	}
@@ -73,7 +74,6 @@ func handleGameString(str string) []byte {
 		} else if len(commands) > 2 {
 			if commands[1] == "all players" { //if meta is an update of all
 				allPlayers = commands[2:] //recreate list of players
-				copy(alivePlayers, allPlayers)
 				if spectatorMode {
 					finalValue = fmt.Sprint("Updated players.\n")
 				}
@@ -189,7 +189,7 @@ func handleInputString(str string) []byte {
 		}
 	case "list": //lists all players in the server
 		if len(allPlayers) == 0 {
-			log.Println("No other players have registered on this server yet.")
+			log.Println("Wait till game starts.")
 		} else {
 			log.Print("Players:\n")
 			for i := 0; i < len(allPlayers); i++ {
