@@ -207,6 +207,7 @@ func handleInputString(str string) []byte {
 			atk := rand.Intn(15)
 			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, ";", atk, "\n")
 			log.Println("Attack successful for ", atk, " damage.")
+			givePoints(myName,atk)
 		} else {
 			log.Print(commands[1], "is dead and gone.")
 		}
