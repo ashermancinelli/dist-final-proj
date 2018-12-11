@@ -49,7 +49,8 @@ func printAliveList() {//print off list of all alive players
 func killPlayer(name string) bool { // takes out player from alive Players list
 	for i := 0; i < len(alivePlayers); i++ {
 		if name == alivePlayers[i] {
-			alivePlayers = append(alivePlayers[:i], alivePlayers[i+1:]...) //take out player from list
+			// alivePlayers = append(alivePlayers[:i], alivePlayers[i+1:]...) //take out player from list
+			alivePlayers[i] = ""
 			return true
 		}
 	}
@@ -83,7 +84,7 @@ func handleGameString(str string) []byte {
 		gameActive = true
 	case commands[0] == "stop"://stop game and output scores
 		if gameActive {
-			finalValue = fmt.Sprint(commands[1]) //print game results given in stop command
+			finalValue = fmt.Sprint(commands[1], '\n', '\n') //print game results given in stop command
 			gameActive = false
 		}
 
