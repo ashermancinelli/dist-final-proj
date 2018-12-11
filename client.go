@@ -118,17 +118,16 @@ func handleGameString(str string) []byte {
 	switch {
 	case commands[0] == "name":
 		allPlayers = append(allPlayers, commands[1])
-		playerPoints = append(playerPoints, 0)
 		log.Println("New player added.")
 	case commands[0] == "meta": //a message type for anything else
 		if len(commands) == 2 {
 			finalValue = fmt.Sprint(commands[1], "\n") //if meta should be read as just a message, then print message
 		} else if len(commands) > 2 {
 			if commands[1] == "all players" { //if meta is an update of all
-				allPlayers = commands[2:]//recreate list of players
-				playerPoints :=playerPoints[:0]//clears points then recreate in loop below
-				for i:= range allPlayers { //make a list of player points all starting off at 0
-					playerPoints = append(playerPoints,0)
+				allPlayers = commands[2:] //recreate list of players
+				playerPoints = make([]int,len(allPlayers))
+				for i, _ := range playerPoints{
+					playerPoints[i] = 0
 				}
 				alivePlayers = allPlayers
 				if spectatorMode {
@@ -233,15 +232,14 @@ func handleInputString(str string) []byte {
 
 			if found {
 				break
-			} else {
-				nameSet = true
-				myName = commands[1]
-				allPlayers = append(allPlayers, myName)
-				playerPoints = append(playerPoints, 0)
-				finalValue = fmt.Sprint("name;", commands[1], "\n")
-				log.Println("Name has successfully been set.")
 			}
 
+			nameSet = true
+			myName = commands[1]
+			allPlayers = append(allPlayers, myName)
+			playerPoints = append(playerPoints, 0)
+			finalValue = fmt.Sprint("name;", commands[1], "\n")
+			log.Println("Name has successfully been set.")
 		}
 	case "list": //lists all players in the server
 		if len(allPlayers) == 0 {
@@ -298,9 +296,8 @@ func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
 				data = handleGameString(str)
 			}
 
-			if (len(data) < 3) {
-				_, err = dst.Write(data)
-			}
+			_, err = dst.Write(data)
+			
 
 			if err != nil {
 				log.Fatalf("Write error: %s\n", err)
