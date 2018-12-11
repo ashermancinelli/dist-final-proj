@@ -21,16 +21,12 @@ net = require('net');
 var clients = [];
 var names = [];
 var port = 2007; 
-var debug = false;
 var stdin = process.openStdin();
+var started = false;
 
-syncNames = () => 'meta;all players;' + names.join(';');
+syncNames = () => 'meta;all players;' + names.join(';') + '\n';
 
 process.argv.forEach( arg => {
-    if (arg.includes('debug')) {
-       if (arg.split('=')[1] === 'true') debug=true;
-    }
-
     if (arg.includes('port')) {
         port = parseInt(arg.split('=')[1], 10);
     }
@@ -48,8 +44,9 @@ stdin.addListener('data', d => {
     if (d === 'names') {
         d = syncNames();
     } else if (d === 'start') {
-        d = syncNames();
-        d += '\nstart';
+        started = true;
+        broadcast(syncNames(), 'admin');
+        d = 'start\n'
     }
     broadcast(d, 'admin');
     process.stdout.write('Sent admin command: ' + d + '\n');
@@ -64,7 +61,16 @@ net.createServer(sock => {
         broadcast(data, sock);
         process.stdout.write('INTERNAL: ' + data.toString().trim() + ' FROM: ' + sock.name + '\n');
         d = data.toString().trim();
-        if (d.split(';')[0] === 'name') names.push(d.split(';')[1]);
+
+        // if a new name is added to the server, append to the 
+        if (d.split(';')[0] === 'name' && !started) names.push(d.split(';')[1]);
+        if (d.split(';')[0] === 'death') {
+            list.splice( list.indexOf( d.split(';')[1] ), 1 );
+            if (names.length < 2) {
+                broadcast("stop\n", 'admin')
+            }
+        }
+
     });
 }).listen(port);
 

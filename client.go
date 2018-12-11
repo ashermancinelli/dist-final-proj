@@ -192,7 +192,7 @@ func handleInputString(str string) []byte {
 		log.Print("You are dead :(\n")
 		return []byte(fmt.Sprint("\n"))
 	}
-	finalValue := "\n"
+	finalValue := ""
 	switch commands[0] {
 	case "help": //print list of usable commands
 		log.Print(usageString)
@@ -210,7 +210,7 @@ func handleInputString(str string) []byte {
 			log.Println("Attack successful for ", atk, " damage.")
 			givePoints(myName,atk)
 		} else {
-			log.Print(commands[1], "is dead and gone.")
+			log.Print(commands[1], " is dead and gone.")
 		}
 	case "name": // set name if given proper input
 		if len(commands) < 2 {
@@ -295,7 +295,9 @@ func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
 				data = handleGameString(str)
 			}
 
-			_, err = dst.Write(data)
+			if (len(data) < 3) {
+				_, err = dst.Write(data)
+			}
 
 			if err != nil {
 				log.Fatalf("Write error: %s\n", err)
