@@ -164,6 +164,7 @@ func handleGameString(str string) []byte {
 			} else {
 				finalValue = fmt.Sprint("You were killed by ", commands[2], "!!!\n")
 				mykiller = commands[2]
+				killPlayer(myName)
 				sendDeathMessage = true
 				myHealth = 0
 				spectatorMode = true
