@@ -36,10 +36,6 @@ For example,
 - `meta;meta details`
 
 
-See Tom or Asher in class. `host.js` 
-if running host on computer at the front of the EJ 214 class the local inet = `10.200.100.69`
+For class demonstration, the `run` script will be configured for the local network. Otherwise, the client program may be ran with `go run client.go -host [HOST NAME] -port :[PORT NAME]` 
 
-Terminal commands:
 for host run `node host.js` to let port be set to the default of `2007`. Otherwise, run `node host.js port=[PORT NUMBER]`
-
-for client run `go run client.go -host [HOST NAME] -port :[PORT NAME]`
