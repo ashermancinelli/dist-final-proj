@@ -50,7 +50,7 @@ func killPlayer(name string) bool { // takes out player from alive Players list
 	for i := 0; i < len(alivePlayers); i++ {
 		if name == alivePlayers[i] {
 			// alivePlayers = append(alivePlayers[:i], alivePlayers[i+1:]...) //take out player from list
-			alivePlayers[i] = ""
+			alivePlayers[i] += " <DEAD> "
 			return true
 		}
 	}
@@ -73,7 +73,7 @@ func handleGameString(str string) []byte {
 		} else if len(commands) > 2 {
 			if commands[1] == "all players" { //if meta is an update of all
 				allPlayers = commands[2:] //recreate list of players
-				alivePlayers = allPlayers[:]
+				copy(alivePlayers, allPlayers)
 				if spectatorMode {
 					finalValue = fmt.Sprint("Updated players.\n")
 				}
