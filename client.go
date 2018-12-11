@@ -18,15 +18,15 @@ const ( //a constant string that shows the possible commands (or at least the on
 )
 
 var ( //player specific variables
-	allPlayers       []string //list of all players in game
-	playerPoints     int      //amount of points player has earned
-	myName           = "placeholder"
-	nameSet          = false
-	gameActive       = false
-	myHealth         = 100
-	mykiller         = "stillAlive"
-	spectatorMode    = false
-	sendDeathMessage = false
+	allPlayers       []string        //list of all players in game
+	playerPoints     int             //amount of points player has earned
+	myName           = "placeholder" //players name, start just as placeholder
+	nameSet          = false         //flag if name has been set
+	gameActive       = false         //flag if game has started
+	myHealth         = 100           //each player starts with 100 health points
+	mykiller         = "stillAlive"  //keeps track of killer to let you know who killed ya
+	spectatorMode    = false         //spectator mode lets dead players watch everyone else attack each other
+	sendDeathMessage = false         //flag to report to system that user has been killed
 )
 
 func isPlayerAlive(name string) bool { //return true if named player is in alivePlayers list, false if not
@@ -102,10 +102,10 @@ func handleGameString(str string) []byte {
 			log.Println(commands[1], " was attacked by ", commands[2], " for ", commands[3], "damage.\n")
 		} else if commands[1] == myName { //if this player was attacked
 			damage, _ := strconv.Atoi(commands[3])
-			if myHealth > damage {
+			if myHealth > damage { //if attack but not killed then decrement health and print to user
 				myHealth = myHealth - damage
 				finalValue = fmt.Sprint("You were attacked by ", commands[2], " for ", commands[3], " damage.\n")
-			} else {
+			} else { //if killed notify user, update my killer, report death to system, set health to 0 and enter spectator mode
 				finalValue = fmt.Sprint("You were killed by ", commands[2], "!!!\n")
 				mykiller = commands[2]
 				killPlayer(myName)
@@ -118,7 +118,7 @@ func handleGameString(str string) []byte {
 		// finalValue = "error;unhandled tag;" + commands[0] + "\n"
 		finalValue = ""
 	}
-	return []byte(finalValue)
+	return []byte(finalValue) //this value will be given to user
 }
 
 //handles messages given from this client, and processes them to be sent to other players
@@ -143,26 +143,26 @@ func handleInputString(str string) []byte {
 	case "attack": // attack a player, if bad format, or not alive, give error message
 		if !gameActive {
 			log.Print("Game has not started yet!\n")
-		} else if len(commands) < 2 {
+		} else if len(commands) < 2 { //bad format error
 			log.Print("You have not given enough arguments!\n")
 			log.Print("Format: attack [PLAYER NAME]\n")
-		} else if isPlayerAlive(commands[1]) {
+		} else if isPlayerAlive(commands[1]) { //look to see if that player is alive, if so attack
 			atk := rand.Intn(15)
 			finalValue = fmt.Sprint("attack;", commands[1], ";", myName, ";", atk, "\n")
 			log.Println("Attack successful for ", atk, " damage.")
 			playerPoints += atk
-		} else {
+		} else { //if player not found then they are dead or were never playing
 			log.Print(commands[1], " is dead and gone.")
 		}
 	case "name": // set name if given proper input
 		if len(commands) < 2 {
-			log.Println("My name: ", myName)
+			log.Println("My name: ", myName) // return user name
 			break
 		}
 
-		if nameSet {
+		if nameSet { //if name already set, report error since you can only set name once
 			log.Print("You can only set your name once!\n")
-		} else if len(commands[1]) > 5 {
+		} else if len(commands[1]) > 5 { //make sure that name isnt over 5 characters
 			log.Print("Your name must be 5 characters or less with no special characters.\n")
 		} else {
 			// // This is a breaking change becuase we cannot sync the names of all the
@@ -180,7 +180,7 @@ func handleInputString(str string) []byte {
 			// 	break
 			// }
 
-			nameSet = true
+			nameSet = true //set name
 			myName = commands[1]
 			// allPlayers = append(allPlayers, myName)
 			finalValue = fmt.Sprint("name;", commands[1], "\n")
@@ -188,8 +188,8 @@ func handleInputString(str string) []byte {
 		}
 	case "list": //lists all players in the server
 		if len(allPlayers) == 0 {
-			log.Println("Wait till game starts.")
-		} else {
+			log.Println("Wait till game starts.") //cant know who is in the lobby until game starts
+		} else { //list all other players
 			log.Print("Players:\n")
 			for i := 0; i < len(allPlayers); i++ {
 				log.Print("Player ", i, ": ", allPlayers[i])
@@ -206,11 +206,11 @@ func handleInputString(str string) []byte {
 		finalValue = fmt.Sprint("error;bad_input_string;", str, "\n")
 	}
 
-	return []byte(finalValue)
+	return []byte(finalValue) //report user input to system
 }
 
-func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
-	buf := make([]byte, 1024)
+func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int { //reader both from system to client and client to system
+	buf := make([]byte, 1024) //message can only be 1024 characters
 	sync := make(chan int)
 
 	go func() {
@@ -222,7 +222,7 @@ func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
 			sync <- 0
 		}()
 
-		for {
+		for { //connect to system read and write functions
 
 			nBytes, err := src.Read(buf)
 			if err != nil {
@@ -232,6 +232,8 @@ func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
 				break
 			}
 
+			// routes the icnoming and outgoing data through the correct
+			// functions for interpretation
 			var data []byte
 			if isOutgoing {
 				str := string(buf[0:nBytes])
@@ -241,6 +243,7 @@ func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
 				data = handleGameString(str)
 			}
 
+			// write outgoing data to the destination socket
 			_, err = dst.Write(data)
 
 			if err != nil {
@@ -253,11 +256,15 @@ func streamCpy(src io.Reader, dst io.Writer, isOutgoing bool) <-chan int {
 
 }
 
-func HandleCons(con net.Conn) {
+func HandleCons(con net.Conn) { //connect and disconnect gracefully
 
+	// creates two channels which control the execution of
+	// the input and output streams
 	stdoutChan := streamCpy(con, os.Stdout, false)
 	remoteChan := streamCpy(os.Stdin, con, true)
 
+	// if anything can be pulled from one of the previous channels,
+	// the program is over and can now close
 	select {
 	case <-stdoutChan:
 		log.Println("Remote connection broken.")
@@ -280,7 +287,7 @@ func StartClient(host string, port string) {
 
 func main() {
 
-	rand.Seed(time.Now().UTC().UnixNano())
+	rand.Seed(time.Now().UTC().UnixNano()) // set random seed for each client
 	var host, port string
 	flag.StringVar(&host, "host", "", "Remote host to connect to")
 	flag.StringVar(&port, "port", ":8080", "Port of remote host")
