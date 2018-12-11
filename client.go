@@ -73,7 +73,7 @@ func handleGameString(str string) []byte {
 		} else if len(commands) > 2 {
 			if commands[1] == "all players" { //if meta is an update of all
 				allPlayers = commands[2:] //recreate list of players
-				alivePlayers = allPlayers
+				alivePlayers = allPlayers[:]
 				if spectatorMode {
 					finalValue = fmt.Sprint("Updated players.\n")
 				}
@@ -84,7 +84,8 @@ func handleGameString(str string) []byte {
 		gameActive = true
 	case commands[0] == "stop"://stop game and output scores
 		if gameActive {
-			finalValue = fmt.Sprint(commands[1], '\n', '\n') //print game results given in stop command
+			finalValue = fmt.Sprint(commands[1]) //print game results given in stop command
+			log.Println("\n\n")
 			gameActive = false
 		}
 
